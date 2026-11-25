@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Администрирование — АИС «Электричка»{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">СЛУЖЕБНЫЙ РЕЖИМ</span><h1>Панель администратора</h1><p>Отчётность, денежный ящик и обслуживание оборудования · {{ today }}</p></div><span class="status-chip admin-chip">Доступ администратора</span></div>
+<div class="admin-nav"><a class="active" href="#reports">Отчёты</a><a href="#cash">Денежный ящик</a><a href="#equipment">Оборудование</a><a href="#security">Безопасность</a><a href="{{ url_for('index') }}">Интерфейс пассажира ↗</a></div>
+<section id="reports" class="card section-card">
+  <div class="section-heading"><div><h2>Отчёт за текущую дату</h2><p class="muted">Сведения о проданных билетах и выручке.</p></div><a class="button secondary" href="{{ url_for('report_csv') }}">Скачать CSV</a></div>
+  <div class="metrics"><div class="metric"><small>Продано билетов</small><b>{{ ticket_count }}</b></div><div class="metric"><small>Выручка за день</small><b>{{ total }} ₽</b></div><div class="metric"><small>Денег в ящике</small><b>{{ cash_total }} ₽</b></div></div>
+  <div class="table-wrap"><table><thead><tr><th>Время покупки</th><th>Маршрут</th><th>Дата поездки</th><th>Время</th><th class="right">Стоимость</th></tr></thead><tbody>
+  {% for ticket in tickets %}<tr><td>{{ ticket.purchased_at[11:16] }}</td><td>{{ ticket.departure }} → {{ ticket.arrival }}</td><td>{{ ticket.travel_date }}</td><td>{{ ticket.travel_time }}</td><td class="right">{{ ticket.price }} ₽</td></tr>
+  {% else %}<tr><td colspan="5" class="empty">Сегодня билеты ещё не продавались.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+<section id="cash" class="card section-card">
+  <div class="section-heading"><div><h2>Денежный ящик</h2><p class="muted">Количество денежных знаков каждого номинала и их суммарная стоимость.</p></div><span class="status-chip">Учёт включён</span></div>
+  <div class="table-wrap"><table><thead><tr><th>Тип</th><th>Номинал</th><th class="right">Количество</th><th class="right">Сумма</th></tr></thead><tbody>
+  {% for n in denominations %}<tr><td>{% if n <= 2 %}Монета{% else %}Купюра{% endif %}</td><td>{{ n }} ₽</td><td class="right">{{ stock[n] }}</td><td class="right">{{ n * stock[n] }} ₽</td></tr>{% endfor %}
+  </tbody></table></div>
+  <form class="management-form" method="post" action="{{ url_for('admin_cash') }}">
+    <label>Номинал<select name="denomination">{% for n in denominations %}<option value="{{ n }}">{{ n }} ₽</option>{% endfor %}</select></label>
+    <label>Количество<input type="number" name="quantity" min="1" max="500" value="1" required></label>
+    <div class="button-pair"><button class="button primary" name="action" value="add">Добавить</button><button class="button secondary" name="action" value="remove">Изъять</button></div>
+  </form>
+</section>
+<section id="equipment" class="card section-card">
+  <h2>Обслуживание принтера</h2><p class="muted">Текущий запас бумаги: <b>{{ paper }} листов</b>.</p>
+  <form class="management-form compact" method="post" action="{{ url_for('admin_paper') }}">
+    <label>Установить количество листов<input type="number" name="paper_count" min="0" max="1000" value="{{ paper }}" required></label>
+    <button class="button primary" type="submit">Обновить запас</button>
+  </form>
+  {% if paper == 0 %}<div class="flash error">Внимание: бумага закончилась. Продажа билетов заблокирована.</div>{% elif paper < 10 %}<div class="flash warning">Запас бумаги заканчивается. Требуется обслуживание.</div>{% else %}<div class="flash success">Запас бумаги в норме.</div>{% endif %}
+</section>
+<section id="security" class="card section-card">
+  <h2>Безопасность</h2><p class="muted">Изменение пароля доступа к сервисной консоли.</p>
+  <form class="management-form compact" method="post" action="{{ url_for('admin_password') }}">
+    <label>Новый пароль (минимум 6 символов)<input type="password" name="new_password" minlength="6" required></label>
+    <button class="button secondary" type="submit">Изменить пароль</button>
+  </form>
+</section>
+{% endblock %}

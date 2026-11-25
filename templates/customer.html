@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Покупка билета — АИС «Электричка»{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">ПАССАЖИРСКИЙ ТЕРМИНАЛ</span><h1>Покупка билета</h1><p>Выберите маршрут, время поездки и оплатите билет.</p></div><span class="status-chip">Терминал № 020 · Работает</span></div>
+<div class="customer-grid">
+  <section class="card">
+    <div class="card-title"><h2>Маршрут поездки</h2><span class="step-label">Шаг 1 из 2</span></div>
+    <div class="display-screen"><small>ИНФОРМАЦИОННОЕ ТАБЛО</small><strong id="display-message">Выберите направление движения</strong><span id="display-sub">Укажите пункты отправления и прибытия.</span></div>
+    <div class="form-grid">
+      <label>Направление<select id="direction"><option value="">Выберите направление</option>{% for direction in routes %}<option value="{{ direction }}">{{ direction }}</option>{% endfor %}</select></label>
+      <label>Пункт отправления<select id="departure" disabled><option value="">Сначала выберите направление</option></select></label>
+      <label>Пункт прибытия<select id="arrival" disabled><option value="">Сначала выберите отправление</option></select></label>
+      <label>Дата поездки<input id="travel-date" type="date" min="{{ min_date }}" max="{{ max_date }}" value="{{ min_date }}"></label>
+      <label class="full">Время отправления<select id="travel-time"><option value="">Выберите время</option>{% for time in times %}<option>{{ time }}</option>{% endfor %}</select></label>
+    </div>
+    <div class="fare-row"><div><small>Стоимость билета</small><strong id="fare">—</strong></div><button id="confirm-route" class="button primary">Подтвердить маршрут</button></div>
+    <div id="route-feedback" class="inline-feedback"></div>
+  </section>
+  <aside class="card payment-card">
+    <div class="card-title"><h2>Оплата</h2><span class="step-label">Шаг 2 из 2</span></div>
+    <p class="muted">Нажмите на номинал, чтобы внести деньги в автомат.</p>
+    <div class="denomination-grid">{% for n in [1,2,5,10,20] %}<button class="denomination" data-value="{{ n }}">{{ n }} ₽<small>{% if n <= 2 %}Монета{% else %}Купюра{% endif %}</small></button>{% endfor %}</div>
+    <div class="payment-numbers"><div><small>Внесено</small><strong id="inserted">0 ₽</strong></div><div><small>Осталось</small><strong id="remaining">—</strong></div></div>
+    <button id="pay-button" class="button primary wide" disabled>Оплатить и напечатать</button>
+    <button id="cancel-button" class="button secondary wide" disabled>Возврат денег</button>
+    <div id="payment-feedback" class="inline-feedback">Сначала выберите маршрут.</div>
+    <div id="ticket-result" class="ticket hidden"></div>
+  </aside>
+</div>
+<div class="info-strip"><div><b>Принимаются:</b> монеты 1 и 2 ₽, купюры 5, 10 и 20 ₽.</div><div><b>Дата:</b> сегодня или любой день в ближайшие 10 суток.</div></div>
+{% endblock %}
+{% block scripts %}
+<script>window.KIOSK_ROUTES = {{ routes|tojson }};</script>
+<script src="{{ url_for('static', filename='js/customer.js') }}"></script>
+{% endblock %}

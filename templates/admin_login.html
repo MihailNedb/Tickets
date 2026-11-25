@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Вход персонала — АИС «Электричка»{% endblock %}
+{% block content %}
+<div class="login-wrap">
+  <section class="card login-card">
+    <span class="eyebrow">СЛУЖЕБНЫЙ ДОСТУП</span><h1>Вход администратора</h1>
+    <p class="muted">Раздел предназначен для обслуживающего персонала и руководителей.</p>
+    <form method="post">
+      <label>Пароль<input type="password" name="password" required autofocus placeholder="Введите пароль"></label>
+      <button class="button primary wide" type="submit">Войти в систему</button>
+    </form>
+    <p class="hint">Начальный пароль учебной версии: <code>admin20</code>. После входа его можно изменить.</p>
+    <a href="{{ url_for('index') }}" class="back-link">← Вернуться к покупке билета</a>
+  </section>
+</div>
+{% endblock %}
